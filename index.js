@@ -3,21 +3,37 @@ const fs = require('node:fs');
 
 const hostname = '127.0.0.1';
 const port = 8000;
+const ROUTES = [
+    { urlPath: '/', filePath: './pages/index.html'},
+    { urlPath: '/about', filePath: './pages/about.html'},
+    { urlPath: '/contact-me', filePath: './pages/contact-me.html'},
+]
 
-fs.readFile('./pages/index.html', (err, data) => {
-    if (err) {
-        console.error(err)
+function updateResponseContent(resp, filePath) {
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        resp.write(data);
+        resp.end();
+    });
+}
+
+const server = createServer((req, res) => {
+    const matchingRoute = ROUTES.find((route) => route.urlPath === req.url)
+    // Check if a 404 should be sent back
+    if (!matchingRoute) {
+        res.statusCode = 404;
+        res.writeHead(404, {'Content-Type': 'text/html'});
+        updateResponseContent(res, './pages/404.html');
         return;
     }
-    console.log(data);
-    
-    const server = createServer((req, res) => {
-        res.statusCode = 200;
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.write(data);
-        res.end();
-    });
-    server.listen(port, hostname, () => {
+    res.statusCode = 200;
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    updateResponseContent(res, matchingRoute.filePath);
+});
+
+server.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
-    });
 });
