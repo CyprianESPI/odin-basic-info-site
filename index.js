@@ -2,7 +2,7 @@ const { createServer } = require('node:http');
 const fs = require('node:fs');
 
 const hostname = 'localhost';
-const port = 8000;
+const port = 8080;
 const ROUTES = [
     { urlPath: '/', filePath: './pages/index.html'},
     { urlPath: '/about', filePath: './pages/about.html'},
